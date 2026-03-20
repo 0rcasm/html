@@ -41,7 +41,7 @@
     iframe {
       width: 50%;
       border: none;
-      background: white;
+      background: black; /* 🔥 흰색 제거 */
     }
 
     button {
@@ -68,7 +68,6 @@
   <iframe id="preview"></iframe>
 </div>
 
-<!-- 라이브러리 -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
@@ -76,14 +75,19 @@
   const editor = document.getElementById("editor");
   const preview = document.getElementById("preview");
 
-  // 저장된 코드 불러오기
   editor.value = localStorage.getItem("code") || `<h1>Hello</h1>\n<p>여기에 HTML 붙여넣기</p>`;
 
   function update() {
-    preview.srcdoc = editor.value;
+    // 🔥 자동으로 body 여백 제거
+    const style = `
+      <style>
+        body { margin: 0; }
+      </style>
+    `;
+
+    preview.srcdoc = style + editor.value;
   }
 
-  // 자동 저장 + 미리보기
   let timeout;
   editor.addEventListener("input", () => {
     localStorage.setItem("code", editor.value);
@@ -92,7 +96,6 @@
     timeout = setTimeout(update, 300);
   });
 
-  // 기본 템플릿
   function loadTemplate() {
     const template = `<!DOCTYPE html>
 <html>
@@ -112,7 +115,6 @@
     update();
   }
 
-  // 초기화
   function clearCode() {
     if (confirm("내용을 초기화할까?")) {
       editor.value = "";
@@ -121,7 +123,6 @@
     }
   }
 
-  // 🔥 HTML 저장
   function downloadHTML() {
     const blob = new Blob([editor.value], { type: "text/html" });
     const link = document.createElement("a");
@@ -130,7 +131,6 @@
     link.click();
   }
 
-  // 🔥 이미지 저장
   function downloadImage() {
     const iframe = document.getElementById("preview");
 
@@ -142,7 +142,6 @@
     });
   }
 
-  // 🔥 PDF 저장
   async function downloadPDF() {
     const iframe = document.getElementById("preview");
 
