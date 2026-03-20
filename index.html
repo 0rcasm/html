@@ -5,16 +5,11 @@
   <title>HTML 미리보기</title>
 
   <style>
-    body {
-      margin: 0;
-      font-family: sans-serif;
-    }
+    body { margin: 0; font-family: sans-serif; }
 
     .topbar {
       position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
+      top: 0; left: 0; right: 0;
       height: 40px;
       background: #111;
       color: white;
@@ -23,6 +18,7 @@
       padding: 0 10px;
       font-size: 14px;
       z-index: 10;
+      gap: 8px;
     }
 
     .container {
@@ -45,10 +41,10 @@
     iframe {
       width: 50%;
       border: none;
+      background: white;
     }
 
     button {
-      margin-left: 10px;
       padding: 4px 10px;
       cursor: pointer;
     }
@@ -62,6 +58,9 @@
   <button onclick="update()">새로고침</button>
   <button onclick="loadTemplate()">기본 템플릿</button>
   <button onclick="clearCode()">초기화</button>
+  <button onclick="downloadHTML()">HTML 저장</button>
+  <button onclick="downloadImage()">이미지 저장</button>
+  <button onclick="downloadPDF()">PDF 저장</button>
 </div>
 
 <div class="container">
@@ -69,18 +68,22 @@
   <iframe id="preview"></iframe>
 </div>
 
+<!-- 라이브러리 -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
 <script>
   const editor = document.getElementById("editor");
   const preview = document.getElementById("preview");
 
-  // 🔥 저장된 코드 불러오기
+  // 저장된 코드 불러오기
   editor.value = localStorage.getItem("code") || `<h1>Hello</h1>\n<p>여기에 HTML 붙여넣기</p>`;
 
   function update() {
     preview.srcdoc = editor.value;
   }
 
-  // 🔥 자동 저장 + 미리보기 (딜레이)
+  // 자동 저장 + 미리보기
   let timeout;
   editor.addEventListener("input", () => {
     localStorage.setItem("code", editor.value);
@@ -89,7 +92,7 @@
     timeout = setTimeout(update, 300);
   });
 
-  // 🔹 기본 템플릿
+  // 기본 템플릿
   function loadTemplate() {
     const template = `<!DOCTYPE html>
 <html>
@@ -109,7 +112,7 @@
     update();
   }
 
-  // 🔹 초기화
+  // 초기화
   function clearCode() {
     if (confirm("내용을 초기화할까?")) {
       editor.value = "";
@@ -118,7 +121,44 @@
     }
   }
 
-  // 최초 실행
+  // 🔥 HTML 저장
+  function downloadHTML() {
+    const blob = new Blob([editor.value], { type: "text/html" });
+    const link = document.createElement("a");
+    link.download = "document.html";
+    link.href = URL.createObjectURL(blob);
+    link.click();
+  }
+
+  // 🔥 이미지 저장
+  function downloadImage() {
+    const iframe = document.getElementById("preview");
+
+    html2canvas(iframe.contentDocument.body).then(canvas => {
+      const link = document.createElement("a");
+      link.download = "preview.png";
+      link.href = canvas.toDataURL();
+      link.click();
+    });
+  }
+
+  // 🔥 PDF 저장
+  async function downloadPDF() {
+    const iframe = document.getElementById("preview");
+
+    const canvas = await html2canvas(iframe.contentDocument.body);
+    const imgData = canvas.toDataURL("image/png");
+
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF();
+
+    const imgWidth = 190;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+    pdf.addImage(imgData, "PNG", 10, 10, imgWidth, imgHeight);
+    pdf.save("preview.pdf");
+  }
+
   update();
 </script>
 
