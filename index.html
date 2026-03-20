@@ -41,7 +41,7 @@
     iframe {
       width: 50%;
       border: none;
-      background: black; /* 🔥 흰색 제거 */
+      background: transparent; /* 🔥 완전 제거 */
     }
 
     button {
@@ -77,11 +77,21 @@
 
   editor.value = localStorage.getItem("code") || `<h1>Hello</h1>\n<p>여기에 HTML 붙여넣기</p>`;
 
+  // 🔥 완전 강제 스타일 덮어쓰기 버전
   function update() {
-    // 🔥 자동으로 body 여백 제거
     const style = `
       <style>
-        body { margin: 0; }
+        html, body {
+          margin: 0 !important;
+          padding: 0 !important;
+          width: 100% !important;
+          max-width: 100% !important;
+          background: transparent !important;
+        }
+
+        * {
+          box-sizing: border-box;
+        }
       </style>
     `;
 
